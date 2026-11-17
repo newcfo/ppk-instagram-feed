@@ -6,6 +6,7 @@ Only public Behold feed metadata are exposed. No credentials or OAuth tokens.
 import datetime as dt
 import json
 import pathlib
+import shutil
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
@@ -82,6 +83,7 @@ def main():
     payload = build_payload(feed)
     SITE.mkdir(parents=True, exist_ok=True)
     (SITE / ".nojekyll").write_text("", encoding="utf-8")
+    shutil.copyfile("site/ppk-instagram-home-adapter.js", SITE / "ppk-instagram-home-adapter.js")
     (SITE / "ppk-instagram-weekly.js").write_text(build_js(payload), encoding="utf-8")
     (SITE / "index.html").write_text(
         '<!doctype html><html lang="ko"><meta charset="utf-8"><title>PPK Instagram weekly feed</title>'
