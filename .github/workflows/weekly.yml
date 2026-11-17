@@ -1,0 +1,40 @@
+name: Update PPK Instagram every Monday
+
+on:
+  schedule:
+    # Monday 00:00 UTC = Monday 09:00 Korea (GitHub can delay runs).
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: ppk-public-instagram-feed
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run feed parsing tests
+        run: python -m unittest discover -s scripts -p 'test_*.py'
+      - name: Fetch Behold and prepare six-card snapshot
+        run: python scripts/build_feed.py
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - name: Deploy public snapshot
+        id: deployment
+        uses: actions/deploy-pages@v4
